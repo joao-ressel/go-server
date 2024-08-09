@@ -1,0 +1,23 @@
+# Define a configuração para o sqlc, uma ferramenta para gerar código Go a partir de consultas SQL
+
+version: "2"  # Versão da configuração do sqlc a ser utilizada
+
+# Seção principal para configurações de SQL
+sql:
+  # Define um bloco de configuração para o banco de dados e geração de código
+  - engine: "postgresql"  # Tipo de banco de dados usado (PostgreSQL)
+    queries: "./queries"  # Caminho para os arquivos de consulta SQL
+    schema: "./migrations"  # Caminho para os arquivos de esquema do banco de dados (migrations)
+    gen:
+      go:
+        out: "."  # Diretório onde o código Go gerado será salvo
+        package: "pgstore"  # Nome do pacote Go a ser usado para o código gerado
+        sql_package: "pgx/v5"  # Pacote Go SQL a ser usado (neste caso, pgx/v5 para PostgreSQL)
+        emit_json_tags: true  # Gera tags JSON para os campos dos structs no código Go
+        emit_db_tags: true  # Gera tags de banco de dados para os campos dos structs no código Go
+        overrides:
+          # Configurações específicas para tipos de dados
+          - db_type: "uuid"  # Tipo de dado no banco de dados
+            go_type:
+              import: "github.com/google/uuid"  # Pacote Go a ser importado para o tipo de dado
+              type: "UUID"  # Tipo Go a ser usado (neste caso, UUID)

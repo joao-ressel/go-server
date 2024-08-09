@@ -1,0 +1,56 @@
+# Define os serviços e volumes que serão usados no Docker Compose
+
+services:
+  # Serviço para o banco de dados PostgreSQL
+  db:
+    # Imagem do Docker a ser utilizada para o serviço de banco de dados
+    image: postgres:latest
+    # Define a política de reinício do container. 'unless-stopped' significa que o container será reiniciado automaticamente
+    # a menos que ele seja manualmente parado pelo usuário
+    restart: unless-stopped
+    # Mapeia a porta 5432 do container para a porta especificada na variável de ambiente WSRS_DATABASE_PORT no host.
+    # Se a variável não estiver definida, a porta padrão 5432 será usada.
+    ports:
+      - ${WSRS_DATABASE_PORT:-5432}:5432
+    # Define variáveis de ambiente para configurar o banco de dados PostgreSQL
+    environment:
+      # Nome do usuário do banco de dados PostgreSQL
+      POSTGRES_USER: ${WSRS_DATABASE_USER}
+      # Senha do usuário do banco de dados PostgreSQL
+      POSTGRES_PASSWORD: ${WSRS_DATABASE_PASSWORD}
+      # Nome do banco de dados a ser criado
+      POSTGRES_DB: ${WSRS_DATABASE_NAME}
+    # Define um volume para persistir os dados do banco de dados
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  # Serviço para o PgAdmin (interface gráfica para gerenciar o PostgreSQL)
+  pgadmin:
+    # Imagem do Docker a ser utilizada para o PgAdmin
+    image: dpage/pgadmin4:latest
+    # Define a política de reinício do container
+    restart: unless-stopped
+    # Define que o PgAdmin depende do serviço 'db', o que significa que o PgAdmin só será iniciado após o banco de dados
+    depends_on:
+      - db
+    # Mapeia a porta 80 do container para a porta 8081 no host
+    ports:
+      - 8081:80
+    # Define variáveis de ambiente para configurar o PgAdmin
+    environment:
+      # E-mail padrão para login no PgAdmin
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      # Senha padrão para login no PgAdmin
+      PGADMIN_DEFAULT_PASSWORD: password
+    # Define um volume para persistir dados do PgAdmin
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+
+# Define volumes para persistência de dados
+volumes:
+  # Volume para os dados do banco de dados PostgreSQL
+  db:
+    driver: local
+  # Volume para os dados do PgAdmin
+  pgadmin:
+    driver: local
