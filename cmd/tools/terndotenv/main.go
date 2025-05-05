@@ -1,24 +1,20 @@
 package main
 
 import (
-	"os/exec" // Pacote para executar comandos externos
+	"fmt"
+	"os/exec"
 
-	"github.com/joho/godotenv" // Pacote para carregar variáveis de ambiente de um arquivo .env
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Carrega as variáveis de ambiente do arquivo .env
-	// Se houver um erro durante o carregamento (por exemplo, se o arquivo .env não for encontrado),
-	// o programa dispara um pânico (interrompe a execução com uma mensagem de erro).
+	// Carrega variáveis de ambiente do .env
 	if err := godotenv.Load(); err != nil {
-		panic(err)
+		fmt.Println("Erro ao carregar o arquivo .env:", err)
+		return
 	}
 
-	// Cria um comando que executa o comando externo "tern migrate"
-	// O comando tern é utilizado para gerenciar migrações de banco de dados
-	// Os parâmetros passados são:
-	// --migrations: Especifica o diretório onde estão as migrações
-	// --config: Especifica o arquivo de configuração do tern
+	// Comando tern migrate
 	cmd := exec.Command(
 		"tern",
 		"migrate",
@@ -28,9 +24,14 @@ func main() {
 		"./internal/store/pgstore/migrations/tern.conf",
 	)
 
-	// Executa o comando configurado anteriormente
-	// Se houver um erro durante a execução do comando, o programa dispara um pânico
-	if err := cmd.Run(); err != nil {
-		panic(err)
+	// Executa o comando e captura a saída
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Printf("Erro ao executar o comando: %s\n", err)
+		fmt.Printf("Saída do comando: %s\n", output)
+		return
 	}
+
+	fmt.Println("Migrações executadas com sucesso:")
+	fmt.Println(string(output))
 }
